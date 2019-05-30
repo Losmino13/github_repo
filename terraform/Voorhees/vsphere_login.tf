@@ -1,6 +1,6 @@
 variable "vsphere_server" {
     description = "vsphere server for the environment"
-    default = "10.238.201.6"
+    default = "IpAddress"
 }
 
 variable "vsphere_user" {
