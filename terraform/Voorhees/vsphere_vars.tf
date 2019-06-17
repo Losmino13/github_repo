@@ -20,6 +20,11 @@ data "vsphere_datastore" "datastore" {
   datacenter_id = "${data.vsphere_datacenter.dc.id}"
 }
 
+data "vsphere_datastore" "iso_datastore"{
+  name          = "nfs_iso_immages"
+  datacenter_id =  "${data.vsphere_datacenter.dc.id}"
+}
+
 data "vsphere_network" "network201" {
   name          = "VLAN 201"
   datacenter_id = "${data.vsphere_datacenter.dc.id}"

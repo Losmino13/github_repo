@@ -34,6 +34,11 @@ resource "vsphere_virtual_machine" "SierraIsolatedVM" {
         network_id = "${data.vsphere_network.network11.id}"
         adapter_type = "${data.vsphere_virtual_machine.Sierra_minimal.network_interface_types[0]}"
     }
+    
+    cdrom {
+        datastore_id = "${data.vsphere_datastore.iso_datastore.id}"
+        path         = "rhel-server-7.6-x86_64-dvd.iso"
+    }
 
     clone {
         template_uuid = "${data.vsphere_virtual_machine.Sierra_minimal.id}"
@@ -51,6 +56,7 @@ resource "vsphere_virtual_machine" "SierraIsolatedVM" {
             
             dns_server_list = ["192.168.11.214","168.162.128.165"]
             dns_suffix_list = ["wayne.fnx.com","internal.sungard.corp"]
+            ipv4_gateway = "192.168.11.1"
 
             
         }

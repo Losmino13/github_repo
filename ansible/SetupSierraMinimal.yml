@@ -1,0 +1,315 @@
+#Some thing befor running playbook
+# ---This playbook need sto run from machine which can access I file
+# ---You need to have database client installed on applicative server
+# ---Before running fnxinst make sure database user is created and login confirmed
+
+# variables needed to be provided in extra_vars:
+# dbo_username
+# database (ORACLE,SYBASE)
+# db_name
+# db_service_name
+# db_host_name
+# db_port (1521,5000)
+# db_inst_dir
+
+---
+
+- name: SetupSierraMinimal
+  hosts: sie-test1
+  gather_facts: no 
+  tasks:
+    - name: HOST NAME
+      command: uname -a
+      register: stdout
+    - debug: var=stdout.stdout_lines
+#disable selinux
+    - name: Disable selinux
+      selinux:
+        state: disabled
+#disable firewall
+    - name: Disable firewall
+      service:
+        state: stopped
+        name: firewalld
+#check directory
+    - name: Direcroty status
+      stat:
+        path: /media/cdrom
+      register: status
+#make dir for cdrom
+    - name: Make cdrom directory
+      file:
+        path: /media/cdrom
+        state: directory
+        owner: root
+        group: root
+        mode: 0755
+      when: status.stat.exists == false
+#mount cdrom
+    - name: Mount cdrom
+      mount:
+        path: /media/cdrom
+        src: /dev/cdrom
+        fstype: iso9660
+        state: mounted
+#copy media.repo
+    - name: Copy media.repo 
+      copy:
+        remote_src: yes
+        src: /media/cdrom/media.repo
+        dest: /etc/yum.repos.d/media.repo
+#edit media repo
+    - name: Edit media.repo
+      blockinfile:
+        path: /etc/yum.repos.d/media.repo
+        insertafter: "\\[InstallMedia\\]"
+        block: |
+          enabled=1
+          baseurl=file:///media/cdrom/
+          gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+        backup: yes
+        marker: ""
+#install packages
+
+#INSTALL ALL PACKAGES
+    - name: including list of packages
+      include_vars:
+        file: sierra_packages.yml
+        name: sierra_packages
+    - name: Install required packages
+      yum:
+        name: "{{ item }}"
+        state: latest
+      loop: "{{ sierra_packages.packages }}"
+#adding group
+    - name: Add group
+      group:
+        name: "{{ dbo_username }}"
+        gid: 31000
+        state: present
+#add user and group
+    - name: Add user
+      user:
+      #This user field needs to be parametrized in script
+        name: "{{ dbo_username }}"
+        uid: 31001
+        group: "{{ dbo_username }}"
+        password: "{{ 'fnxltd' | password_hash('sha512') }}"
+        home: /APPL/{{ dbo_username }}/users/{{ dbo_username }}
+        shell: /bin/tcsh
+        state: present
+        comment: "{{ dbo_username }} user prod"
+#create required dirs
+#make dir for Sierra App
+    - name: Make Sierra App directories
+      file:
+        path: /APPL/{{ dbo_username }}/users/{{ dbo_username }}
+        state: directory
+        owner: "{{ dbo_username }}"
+        group: "{{ dbo_username }}"
+        mode: 0750
+        recurse: yes
+    - name: Set permissions to Sierra directories
+      command: chown -R "{{ dbo_username }}":"{{ dbo_username }}" /APPL
+    - command: chmod -R 750 /APPL
+    - name: Make local bakups directory
+      file:
+        path: /local_backups
+        state: directory
+        owner: "{{ dbo_username }}"
+        group: "{{ dbo_username }}"
+        mode: 0777
+    - name: Copy I file to server
+      synchronize:
+        src: /syb/sol/makeinstall/MR7.8.00.SL.i.lin.tar.gz
+        dest: /local_backups
+    - command: chown "{{ dbo_username }}":"{{ dbo_username }}" /local_backups/MR7.8.00.SL.i.lin.tar.gz
+    - name: Perform next steps as DBO user
+      block: 
+        - name: Extract I file
+          unarchive:
+            remote_src: yes
+            src: /local_backups/MR7.8.00.SL.i.lin.tar.gz
+            dest: /APPL/{{ dbo_username }}
+          #this task will be depricated after 1320 cut
+        - name: Pauza
+          pause:
+            prompt: "Copy valid fnxrc.EXAMPLE from /home/mmilisav/Issues/fnxrc.EXAMPLE/fnxrc.EXAMPLE to $FNXROOT/install"
+        - name: Copy config files
+          copy:
+            remote_src: yes
+            src: "{{ item.src }}"
+            dest: "{{ item.dest }}"
+            mode: '0750'
+          loop:
+              - { src: '/APPL/{{dbo_username}}/install/cshrc.EXAMPLE' , dest: '/APPL/{{ dbo_username }}/users/{{ dbo_username }}/.cshrc' }
+              - { src: '/APPL/{{dbo_username}}/install/fnxrc.EXAMPLE' , dest: '/APPL/{{ dbo_username }}/users/{{ dbo_username }}/.fnxrc' }
+              - { src: '/APPL/{{dbo_username}}/install/Xdefaults.EXAMPLE' , dest: '/APPL/{{ dbo_username }}/users/{{ dbo_username }}/.Xdefaults' }
+              - { src: '/APPL/{{dbo_username}}/install/FNXNet.cnf.EXAMPLE' , dest: '/APPL/{{ dbo_username }}/install/FNXNet.cnf' }
+        - name: Editing .fnxrc file
+          replace:
+            path: /APPL/{{dbo_username}}/users/{{dbo_username}}/.fnxrc
+            regexp: "{{ item.toReplace }}"
+            replace: "{{ item.replaceWith }}"
+          with_items:
+            - { toReplace: '<Absolute_Path_To_FNXROOT_Directory>', replaceWith: '/APPL/{{ dbo_username }}' }
+            - { toReplace: '<SYBASE_OR_ORACLE_DATABASE_NAME>', replaceWith: "{{ db_name }}" }
+            - { toReplace: 'machine:portnumber', replaceWith: 'localhost:31020'}
+            - { toReplace: '<SYB_HOSTNAME_OR_ORACLE_DATABASE_SERVICE_NAME>', replaceWith: "{{ db_service_name }}"}
+            - { toReplace: '<host name for database server>', replaceWith: "{{ db_host_name }}"}
+            - { toReplace: '<port number for database server>', replaceWith: "{{ db_port }}"}
+        - name: Oracle database section
+          shell: "sed -i  '/setenv ORACLE_HOME/,/endif/ s/#//' /APPL/{{dbo_username}}/users/{{dbo_username}}/.fnxrc" 
+          when: database == "ORACLE"
+        - replace: 
+            path: /APPL/{{dbo_username}}/users/{{dbo_username}}/.fnxrc
+            regexp: "{{ item.toReplace }}"
+            replace: "{{ item.replaceWith }}"
+          with_items:
+            - { toReplace: '<Absolute path of oracle installation>', replaceWith: "{{ db_inst_dir }}" }
+            - { toReplace: '<System Identifier of the oracle database instance>', replaceWith: "{{ db_service_name }}" }
+          when: database == "ORACLE"
+        - name: Sybase database section
+          shell: "sed -i  '/setenv SYBASE/,/endif/ s/#//' /APPL/{{dbo_username}}/users/{{dbo_username}}/.fnxrc"
+          when:  database == "SYBASE"
+        - replace:
+            path: /APPL/{{dbo_username}}/users/{{dbo_username}}/.fnxrc
+            regexp: '<LOCATION OF SYBASE 15 INSTALLATION DIRECTORY>'
+            replace: "{{ db_inst_dir }}"
+          when:  database == "SYBASE"
+        - name: Adding login.sql to home
+          blockinfile:
+            path: /APPL/{{dbo_username}}/users/{{dbo_username}}/login.sql
+            create: yes
+            block: |
+              set linesize 500
+              set pagesize 300
+              SET SQLPROMPT "{{ dbo_username }}'@'ORADEMO >"
+            marker: ""
+        - name: Editing FNXNet.cnf file
+          replace:
+            path: /APPL/{{dbo_username}}/install/FNXNet.cnf
+            regexp: "{{ item.toReplace }}"
+            replace: "{{ item.replaceWith }}"
+          with_items:
+            - { toReplace: '/mktg/fnxroot', replaceWith: '/APPL/{{ dbo_username }}' }
+            - { toReplace: 'Data Source:            SYBASE', replaceWith: '#Data Source            SYBASE' }
+            - { toReplace: 'SYB_SERVER', replaceWith: "{{ db_service_name }}" }
+            - { toReplace: '/u01/app/oracle/oracle/product/10.2.0/db_1', replaceWith: "{{ db_inst_dir }}" }
+            - { toReplace: 'ORASID', replaceWith: "{{ db_service_name }}" }
+            - { toReplace: 'fnxadmin', replaceWith: "{{ db_name }}" }
+            - { toReplace: 'sierrasa', replaceWith: "{{ db_name }}SSO" }
+          when: database == "ORACLE"
+
+        - name: Editing FNXNet.cnf file
+          replace:
+            path: /APPL/{{dbo_username}}/install/FNXNet.cnf
+            regexp: "{{ item.toReplace }}"
+            replace: "{{ item.replaceWith }}"
+          with_items:
+            - { toReplace: '/mktg/fnxroot', replaceWith: '/APPL/{{ dbo_username }}' }
+            - { toReplace: 'Data Source:            ORACLE', replaceWith: '#Data Source            ORACLE' }
+            - { toReplace: 'SYB_SERVER', replaceWith: "{{ db_service_name }}" }
+            - { toReplace: 'fnxdb', replaceWith: "{{ db_name }}" }
+            - { toReplace: 'fnxadmin', replaceWith: "{{ db_name }}" }
+            - { toReplace: 'sierrasa', replaceWith: "{{ db_name }}SSO" }
+          when: database == "SYBASE"
+
+      become: true
+      become_user: "{{ dbo_username }}" 
+
+    - name: Create DBO schema commands
+      blockinfile:
+        path: /APPL/{{dbo_username}}/users/{{dbo_username}}/{{dbo_username}}_schema.sql
+        create: yes
+        marker: ""
+        block: |
+          create TABLESPACE {{ dbo_username }}_TS DATAFILE '<Server_dbf_file_location>/{{ dbo_username }}_TS.dbf' size 500M AUTOEXTEND ON NEXT 1M MAXSIZE UNLIMITED EXTENT MANAGEMENT LOCAL SEGMENT SPACE MANAGEMENT AUTO;
+          create user {{ dbo_username }} identified by fnxltd11 default tablespace {{ dbo_username }}_TS temporary tablespace TEMP profile DEFAULT account unlock;
+          create role {{ dbo_username }}_ROLE;
+          grant {{ dbo_username }}_ROLE to {{ dbo_username }} with admin option;
+          grant SELECT_CATALOG_ROLE to {{ dbo_username }} with admin option;
+          grant CREATE TABLE to {{ dbo_username }} with admin option;
+          grant CREATE SESSION to {{ dbo_username }} with admin option;
+          grant CREATE PROCEDURE to {{ dbo_username }};
+          grant CREATE USER to {{ dbo_username }};
+          grant ALTER USER to {{ dbo_username }};
+          grant CREATE ROLE to {{ dbo_username }};
+          grant CREATE SEQUENCE to {{ dbo_username }};
+          grant CREATE SYNONYM to {{ dbo_username }};
+          grant UNLIMITED TABLESPACE to {{ dbo_username }};
+          grant CREATE ANY TRIGGER to {{ dbo_username }};
+          grant CREATE VIEW to {{ dbo_username }};
+          grant ALTER SESSION to {{ dbo_username }};
+          grant DROP USER to {{ dbo_username }};
+          grant EXECUTE ANY PROCEDURE to {{ dbo_username }};
+          grant SELECT on SYS.DBA_ROLE_PRIVS to {{ dbo_username }};
+          grant SELECT on SYS.DBA_SYS_PRIVS to {{ dbo_username }};
+          grant select on SYS.V_$SESSION to {{ dbo_username }} with grant option;
+      when: database == "ORACLE"
+
+    - name: Create tnsnames.ora file
+      blockinfile:
+         path: /{{ db_inst_dir }}/network/admin/tnsnames.ora
+         create: yes
+         marker: ""
+         block: |
+          {{db_service_name}} =
+            (DESCRIPTION =
+              (ADDRESS_LIST =
+                (ADDRESS = (PROTOCOL = TCP)(HOST = {{ db_host_name }})(PORT = {{ db_port }}))
+              )
+              (CONNECT_DATA =
+                (SERVER = DEDICATED)
+                  (SERVICE_NAME = {{ db_service_name }})
+              )
+            )
+      when: database == "ORACLE"
+
+##############################
+    - name: Run fnxinst
+      pause:
+        prompt: |
+           "Run fnxinst, and check log. Continue after fnxinst finished successfully.
+           fnxinst lasts around half hour, please be patient"
+    
+    - block:
+        - name: Crate aes encryption key
+          command: aspencrypt -create_key -new_key_file  /APPL/{{ dbo_username }}/server/.aes128.key
+          args:
+            chdir: /APPL/{{ dbo_username }}/server
+        - name: Create reglogin.info file
+          command: reglogin -c -U {{ dbo_username }} -P fnxltd -D {{ db_name }} -S {{ db_service_name }}
+          args:
+            chdir: /APPL/{{ dbo_username }}/server
+        - name: Creating softlinks
+          command: ln -s reglogin.info reglogin.info.{{ dbo_username }}
+          args:
+            chdir: /APPL/{{ dbo_username }}/server
+        - name: Creating softlinks
+          command: ln -s reglogin.info reglogin.fx.info
+          args:
+            chdir: /APPL/{{ dbo_username }}/server
+        - name: Run CreateDboSsoAndFixUsers script
+          script:  /APPL/{{ dbo_username }}/script/CreateDboSsoAndFixUsers.sh -T O -S {{ db_service_name }} -U {{ dbo_username }} -P fnxltd -u {{ dbo_username }}SSO -p fnxltd
+          # Permissions setup for Sierra dirs
+        - name: Permissions setup for Sierra dirs
+          command:   chmod -R o-rwx /APPL/{{ dbo_username }}
+        - command:   chmod -R g-w  /APPL/{{ dbo_username }}
+        - command:   chmod g+rw /APPL/{{ dbo_username }}/log
+        - command:   chmod g+rw /APPL/{{ dbo_username }}/rep
+        - command:   chmod g+rw /APPL/{{ dbo_username }}/export
+        - command:   chmod g+rw /APPL/{{ dbo_username }}/script
+        - command:   chmod g+rw /APPL/{{ dbo_username }}/bin
+        - name:
+          copy:
+            remote_src: yes
+            src: /APPL/{{ dbo_username }}/server/aspen_template.cfg
+            dest: /APPL/{{ dbo_username }}/server/aspen.cfg
+      become: true
+      become_user: "{{ dbo_username }}"
+
+   
+
+
+

@@ -1,0 +1,60 @@
+---
+#list of packages required for Sierra
+packages:
+  - xorg-x11-utils
+  - mailx
+  - ntp
+  - gdb
+  - tcsh
+  - bind-utils
+  - net-tools
+  - glibc.i686
+  - libX11.i686
+  - libstdc++.i686
+  - pam.i686
+  - libgcrypt.i686
+  - libxml2.i686
+  - ksh
+  - libuuid.i686
+  - bash
+  - bzip2
+  - curl
+  - diffutils
+  - dovecot
+  - findutils
+  - gawk
+  - ghostscript
+  - gnupg
+  - grep
+  - gzip
+  - httpd
+  - httpd-tools
+  - lftp
+  - links
+  - lsof
+  - mutt
+  - procmail
+  - procps-ng
+  - psmisc
+  - rsync
+  - screen
+  - stunnel
+  - sudo
+  - tar
+  - telnet
+  - tigervnc
+  - tigervnc-server
+  - traceroute
+  - unzip
+  - wget
+  - xterm
+  - zip
+#For these packages EPEL repo is required
+optional_packages:
+  - htmldoc
+  - autossh
+  - monit
+  - pbzip2
+  - pigz
+  - pv
+...
