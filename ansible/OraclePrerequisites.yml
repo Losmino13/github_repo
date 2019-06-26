@@ -1,0 +1,76 @@
+---
+- name: SetupSierraMinimal
+  hosts: sie-test1
+  gather_facts: no 
+  tasks:
+#Install Oracle dependent packages
+    - name: including list of packages
+      include_vars:
+        file: /etc/ansible/playbooks/files/oracle_packages.yml
+        name: oracle_packages
+    - name: Install required packages
+      yum:
+        name: "{{ item }}"
+        state: latest
+      loop: "{{ oracle_packages.packages }}"
+    - name: Copy i686 rpm to remote location
+      copy:
+        src: /etc/ansible/playbooks/files/compat-libstdc++-33-3.2.3-72.el7.i686.rpm
+        dest: /root/compat-libstdc++-33-3.2.3-72.el7.i686.rpm
+    - name: Copy x86_64 rpm to remote location
+      copy:
+        src: /etc/ansible/playbooks/files/compat-libstdc++-33-3.2.3-72.el7.x86_64.rpm
+        dest: /root/compat-libstdc++-33-3.2.3-72.el7.x86_64.rpm
+    - name: Install packages from rpm files
+      yum:
+        name:
+          - /root/compat-libstdc++-33-3.2.3-72.el7.i686.rpm
+          - /root/compat-libstdc++-33-3.2.3-72.el7.x86_64.rpm
+        state: present
+#Add Oracle groups
+    - name: Add group
+      group:
+        name: oinstall
+        gid: 200
+        state: present
+    - name: Add group
+      group:
+        name: dba
+        gid: 201
+        state: present
+#Add Oracle user
+    - name: Add user
+      user:
+        name: oracle
+        uid: 440
+        group: oinstall
+        groups: dba
+        password: "{{ 'fnxltd' | password_hash('sha512') }}"
+        home: /home/oracle
+        shell: /bin/bash
+        state: present
+        comment: Oracle user
+#Create oracle home directory
+    - name: make oracle home directory
+      file:
+        path: /home/oracle
+        state: directory
+        owner: oracle
+        group: oinstall
+        mode: 0775
+#Copy Oracle client installation archive
+    - name: Copy installation zip
+      copy:
+        src: files/linuxx64_12201_client.zip
+        dest: /home/oracle
+        mode: '0755'
+      become: yes
+      become_user: oracle
+    - name: Extract clinet archive
+      unarchive:
+        remote_src: yes
+        src: /home/oracle/linuxx64_12201_client.zip
+        dest: /home/oracle
+      become: yes
+      become_user: oracle
+...

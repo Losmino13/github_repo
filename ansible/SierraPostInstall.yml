@@ -1,0 +1,40 @@
+---
+- name: SierraPostInstall
+  hosts: sie-test1
+  gather_facts: no 
+  tasks:
+    - name: Crate aes encryption key
+      command: aspencrypt -create_key -new_key_file  /APPL/{{ dbo_username }}/server/.aes128.key
+      args:
+        chdir: /APPL/{{ dbo_username }}/server
+    - name: Create reglogin.info file
+      command: reglogin -c -U {{ dbo_username }} -P fnxltd -D {{ db_name }} -S {{ db_service_name }}
+      args:
+        chdir: /APPL/{{ dbo_username }}/server
+    - name: Creating softlinks
+      command: ln -s reglogin.info reglogin.info.{{ dbo_username }}
+      args:
+        chdir: /APPL/{{ dbo_username }}/server
+    - name: Creating softlinks
+      command: ln -s reglogin.info reglogin.fx.info
+      args:
+        chdir: /APPL/{{ dbo_username }}/server
+    - name: Run CreateDboSsoAndFixUsers script
+      script:  /APPL/{{ dbo_username }}/script/CreateDboSsoAndFixUsers.sh -T O -S {{ db_service_name }} -U {{ dbo_username }} -P fnxltd -u {{ dbo_username }}SSO -p fnxltd
+      # Permissions setup for Sierra dirs
+    - name: Permissions setup for Sierra dirs
+      command:   chmod -R o-rwx /APPL/{{ dbo_username }}
+    - command:   chmod -R g-w  /APPL/{{ dbo_username }}
+    - command:   chmod g+rw /APPL/{{ dbo_username }}/log
+    - command:   chmod g+rw /APPL/{{ dbo_username }}/rep
+    - command:   chmod g+rw /APPL/{{ dbo_username }}/export
+    - command:   chmod g+rw /APPL/{{ dbo_username }}/script
+    - command:   chmod g+rw /APPL/{{ dbo_username }}/bin
+    - name:
+      copy:
+        remote_src: yes
+        src: /APPL/{{ dbo_username }}/server/aspen_template.cfg
+        dest: /APPL/{{ dbo_username }}/server/aspen.cfg
+  become: true
+  become_user: "{{ dbo_username }}"
+...

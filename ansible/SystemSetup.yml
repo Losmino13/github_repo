@@ -1,0 +1,58 @@
+---
+
+- name: SystemSetup
+  hosts: sie-test1
+  gather_facts: no 
+  tasks:
+    - name: HOST NAME
+      command: uname -a
+      register: stdout
+    - debug: var=stdout.stdout_lines
+#disable selinux
+    - name: Disable selinux
+      selinux:
+        state: disabled
+#disable firewall
+    - name: Disable firewall
+      service:
+        state: stopped
+        name: firewalld
+#check directory
+    - name: Direcroty status
+      stat:
+        path: /media/cdrom
+      register: status
+#make dir for cdrom
+    - name: Make cdrom directory
+      file:
+        path: /media/cdrom
+        state: directory
+        owner: root
+        group: root
+        mode: 0755
+      when: status.stat.exists == false
+#mount cdrom
+    - name: Mount cdrom
+      mount:
+        path: /media/cdrom
+        src: /dev/cdrom
+        fstype: iso9660
+        state: mounted
+#copy media.repo
+    - name: Copy media.repo 
+      copy:
+        remote_src: yes
+        src: /media/cdrom/media.repo
+        dest: /etc/yum.repos.d/media.repo
+#edit media repo
+    - name: Edit media.repo
+      blockinfile:
+        path: /etc/yum.repos.d/media.repo
+        insertafter: "\\[InstallMedia\\]"
+        block: |
+          enabled=1
+          baseurl=file:///media/cdrom/
+          gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+        backup: yes
+        marker: ""
+...
