@@ -4,23 +4,33 @@
   gather_facts: no 
   tasks:
     - name: Crate aes encryption key
-      command: aspencrypt -create_key -new_key_file  /APPL/{{ dbo_username }}/server/.aes128.key
+      shell: source /APPL/{{ dbo_username }}/users/{{ dbo_username }}/.fnxrc && /APPL/{{ dbo_username }}/bin/aspencrypt -m1 -key_file  /APPL/{{ dbo_username }}/server/.aes128.key -key_bytes 32 
+  #    shell: env 
       args:
+        executable: "/bin/tcsh"
         chdir: /APPL/{{ dbo_username }}/server
-    - name: Create reglogin.info file
-      command: reglogin -c -U {{ dbo_username }} -P fnxltd -D {{ db_name }} -S {{ db_service_name }}
+        creates: /APPL/{{ dbo_username }}/server/.aes128.key
+    - shell: source /APPL/{{ dbo_username }}/users/{{ dbo_username }}/.fnxrc && /APPL/{{ dbo_username }}/bin/reglogin -c -U {{ dbo_username }} -P fnxltd11 -D {{ db_name }} -S {{ db_service_name }}
       args:
+        executable: "/bin/tcsh"
         chdir: /APPL/{{ dbo_username }}/server
+        creates: /APPL/{{ dbo_username }}/server/reglogin.info
     - name: Creating softlinks
-      command: ln -s reglogin.info reglogin.info.{{ dbo_username }}
+      file:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        state: link
+      with_items:
+        - { src: '/APPL/{{ dbo_username }}/server/reglogin.info', dest: '/APPL/{{ dbo_username }}/server/reglogin.info.{{ dbo_username }}' }
+        - { src: '/APPL/{{ dbo_username }}/server/reglogin.info', dest: '/APPL/{{ dbo_username }}/server/reglogin.fx.info' }
+    - name: Update dbo password
+      shell: |
+         source /APPL/{{ dbo_username }}/users/{{ dbo_username }}/.fnxrc
+         echo alter table fnxuser disable all triggers\; | sqlplus {{ dbo_username }}/fnxltd11@{{ db_service_name }}
+         echo update fnxuser set cur_passwd = \'`/APPL/{{ dbo_username }}/bin/aspencrypt fnxltd11`\' where user_ID = \'{{ dbo_username }}\'\; | sqlplus {{ dbo_username }}/fnxltd11@{{ db_service_name }}
+         echo alter table fnxuser enable all triggers\; | sqlplus {{ dbo_username }}/fnxltd11@{{ db_service_name }}
       args:
-        chdir: /APPL/{{ dbo_username }}/server
-    - name: Creating softlinks
-      command: ln -s reglogin.info reglogin.fx.info
-      args:
-        chdir: /APPL/{{ dbo_username }}/server
-    - name: Run CreateDboSsoAndFixUsers script
-      script:  /APPL/{{ dbo_username }}/script/CreateDboSsoAndFixUsers.sh -T O -S {{ db_service_name }} -U {{ dbo_username }} -P fnxltd -u {{ dbo_username }}SSO -p fnxltd
+        executable: "/bin/tcsh"
       # Permissions setup for Sierra dirs
     - name: Permissions setup for Sierra dirs
       command:   chmod -R o-rwx /APPL/{{ dbo_username }}
@@ -30,11 +40,15 @@
     - command:   chmod g+rw /APPL/{{ dbo_username }}/export
     - command:   chmod g+rw /APPL/{{ dbo_username }}/script
     - command:   chmod g+rw /APPL/{{ dbo_username }}/bin
-    - name:
+    - name: Copy aspen.cfg
       copy:
         remote_src: yes
         src: /APPL/{{ dbo_username }}/server/aspen_template.cfg
         dest: /APPL/{{ dbo_username }}/server/aspen.cfg
+    - name: Copy sierra.license
+      copy:
+        remote_src: no
+        src: /etc/ansible/playbooks/files/sierra.license.development
+        dest: /APPL/{{ dbo_username }}/sierra.license
   become: true
   become_user: "{{ dbo_username }}"
-...

@@ -198,7 +198,8 @@
           grant SELECT on SYS.DBA_SYS_PRIVS to {{ dbo_username }};
           grant select on SYS.V_$SESSION to {{ dbo_username }} with grant option;
       when: database == "ORACLE"
-
+      become: yes
+      become_user: "{{ dbo_username }}"
     - name: Create tnsnames.ora file
       blockinfile:
          path: /{{ db_inst_dir }}/network/admin/tnsnames.ora
@@ -216,6 +217,8 @@
               )
             )
       when: database == "ORACLE"
+      become: yes
+      become_user: oracle
 
 ##############################
     - name: Run fnxinst
