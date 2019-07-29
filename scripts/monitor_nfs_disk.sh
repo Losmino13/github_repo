@@ -38,8 +38,11 @@ echo "Executed at: " `date` >> $EMAIL
 echo "On the host: " `uname -n` " User: " `whoami` >> $EMAIL
 echo "Script $DIRNAME/$BASENAME" >> $EMAIL
 
-
+SEND_EMAIL_YES=`cat $EMAIL | grep "\-\-\-"`
+if [ ! -z "$SEND_EMAIL_YES" ]
+then
 cat $EMAIL | mailx -s "Belgrade home direcroriums need cleanup" -r milos.milisavljevic@fisglobal.com milos.milisavljevic@fisglobal.com
+fi
 rm -f $DIRNAME/logs/users_to_watch.tmp
 rm -f $EMAIL
 
