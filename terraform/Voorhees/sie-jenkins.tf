@@ -24,6 +24,11 @@ resource "vsphere_virtual_machine" "Jenkins_server" {
         network_id = "${data.vsphere_network.network11.id}"
         adapter_type = "${data.vsphere_virtual_machine.Sierra_app.network_interface_types[0]}"
     }
+
+    network_interface {
+        network_id = "${data.vsphere_network.network201.id}"
+        adapter_type = "${data.vsphere_virtual_machine.Sierra_app.network_interface_types[0]}"
+    }
     
     cdrom {
         datastore_id = "${data.vsphere_datastore.iso_datastore.id}"
