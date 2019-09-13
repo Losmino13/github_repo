@@ -11,7 +11,7 @@ BASELINE=$1
 
 if [[ ! ${BASELINE} =~ 1[2-3]1[1-9] ]]
 then
-    echo "Please insert correct baselineUsage: ./createGroupPatch.sh BASELINE"
+    echo "Please insert correct baseline. Usage: ./createGroupPatch.sh BASELINE"
     exit 1
 fi
 #echo "Enter baseline"
@@ -40,9 +40,10 @@ rm -rf ${EXTRACT_DIR}/*
 
 for VAR in $PATCHES_TO_EXTRACT
 do
+    echo Extracting patch number ${VAR}
     gtar -zxvf MR${RELEASE}.00.$VAR.SL.u.tar.gz -C ${EXTRACT_DIR}
-    gtar -zxvf MR${RELEASE}.00.${LAST_EAR_PATCH}.SL.u.tar.gz -C ${EXTRACT_DIR}
 done
+gtar -zxvf MR${RELEASE}.00.${LAST_EAR_PATCH}.SL.u.tar.gz -C ${EXTRACT_DIR}
 
 cd ${EXTRACT_DIR}
 gtar -zcvf ../MR${RELEASE}.1001-${LAST_PATCH}.tar.gz .

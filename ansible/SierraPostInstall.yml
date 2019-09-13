@@ -4,7 +4,7 @@
   gather_facts: no 
   tasks:
     - name: Crate aes encryption key
-      shell: source /APPL/{{ dbo_username }}/users/{{ dbo_username }}/.fnxrc && /APPL/{{ dbo_username }}/bin/aspencrypt -m1 -key_file  /APPL/{{ dbo_username }}/server/.aes128.key -key_bytes 32 
+      shell: source /APPL/{{ dbo_username }}/users/{{ dbo_username }}/.fnxrc && /APPL/{{ dbo_username }}/bin/aspencrypt -m1 -key_file  /APPL/{{ dbo_username }}/server/.aes128.key -key_bytes 16 
   #    shell: env 
       args:
         executable: "/bin/tcsh"
@@ -52,3 +52,5 @@
         dest: /APPL/{{ dbo_username }}/sierra.license
   become: true
   become_user: "{{ dbo_username }}"
+
+  MENJATI OVU SKRIPTU I KORISTITI aspencrypt
