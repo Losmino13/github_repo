@@ -26,4 +26,8 @@ packages:
   - libXtst
   - make
   - sysstat
+  - unzip
+  - xorg-x11-xauth
+  - xorg-x11-utils
+  - xterm
 ...
