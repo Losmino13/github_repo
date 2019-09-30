@@ -10,7 +10,7 @@
 # db_service_name
 # db_host_name
 # db_port (1521,5000)
-# db_inst_dir
+# db_client_inst_dir
 
 ---
 
@@ -110,14 +110,14 @@
             - { toReplace: '<host name for database server>', replaceWith: "{{ db_host_name }}"}
             - { toReplace: '<port number for database server>', replaceWith: "{{ db_port }}"}
         - name: Oracle database section
-          shell: "sed -i  '/setenv ORACLE_HOME/,/endif/ s/#//' /APPL/{{dbo_username}}/users/{{dbo_username}}/.fnxrc" 
+          shell: "sed -i  '/setenv ORACLE_HOME/,/endif/ s/#//' /APPL/{{dbo_username}}/users/{{dbo_username}}/.fnxrc"
           when: database == "ORACLE"
         - replace: 
             path: /APPL/{{dbo_username}}/users/{{dbo_username}}/.fnxrc
             regexp: "{{ item.toReplace }}"
             replace: "{{ item.replaceWith }}"
           with_items:
-            - { toReplace: '<Absolute path of oracle installation>', replaceWith: "{{ db_inst_dir }}" }
+            - { toReplace: '<Absolute path of oracle installation>', replaceWith: "{{ db_client_inst_dir }}" }
             - { toReplace: '<System Identifier of the oracle database instance>', replaceWith: "{{ db_service_name }}" }
           when: database == "ORACLE"
         - name: Sybase database section
@@ -126,7 +126,7 @@
         - replace:
             path: /APPL/{{dbo_username}}/users/{{dbo_username}}/.fnxrc
             regexp: '<LOCATION OF SYBASE 15 INSTALLATION DIRECTORY>'
-            replace: "{{ db_inst_dir }}"
+            replace: "{{ db_client_inst_dir }}"
           when:  database == "SYBASE"
         - name: Adding login.sql to home
           blockinfile:
@@ -146,7 +146,7 @@
             - { toReplace: '/mktg/fnxroot', replaceWith: '/APPL/{{ dbo_username }}' }
             - { toReplace: 'Data Source:            SYBASE', replaceWith: '#Data Source            SYBASE' }
             - { toReplace: 'SYB_SERVER', replaceWith: "{{ db_service_name }}" }
-            - { toReplace: '/u01/app/oracle/oracle/product/10.2.0/db_1', replaceWith: "{{ db_inst_dir }}" }
+            - { toReplace: '/u01/app/oracle/oracle/product/10.2.0/db_1', replaceWith: "{{ db_client_inst_dir }}" }
             - { toReplace: 'ORASID', replaceWith: "{{ db_service_name }}" }
             - { toReplace: 'fnxadmin', replaceWith: "{{ db_name }}" }
             - { toReplace: 'sierrasa', replaceWith: "{{ db_name }}SSO" }
@@ -167,7 +167,7 @@
           when: database == "SYBASE"
 
       become: true
-      become_user: "{{ dbo_username }}" 
+      become_user: "{{ dbo_username }}"
 
     - name: Create DBO schema commands
       blockinfile:
@@ -202,10 +202,10 @@
       become_user: "{{ dbo_username }}"
     - name: Create tnsnames.ora file
       blockinfile:
-         path: /{{ db_inst_dir }}/network/admin/tnsnames.ora
-         create: yes
-         marker: ""
-         block: |
+        path: /{{ db_client_inst_dir }}/network/admin/tnsnames.ora
+        create: yes
+        marker: ""
+        block: |
           {{db_service_name}} =
             (DESCRIPTION =
               (ADDRESS_LIST =
@@ -219,14 +219,12 @@
       when: database == "ORACLE"
       become: yes
       become_user: oracle
-
-##############################
     - name: Run fnxinst
       pause:
         prompt: |
            "Run fnxinst, and check log. Continue after fnxinst finished successfully.
            fnxinst lasts around half hour, please be patient"
-    
+...
 
 
    
