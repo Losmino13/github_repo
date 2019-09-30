@@ -13,7 +13,7 @@ packages:
   - libaio.i686 
   - libaio
   - libaio-devel.i686 
-  - libaio-devel
+  - libaio-devel.x86_64
   - libgcc.i686 
   - libgcc
   - libstdc++.i686 
