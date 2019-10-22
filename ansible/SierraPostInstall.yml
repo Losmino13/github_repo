@@ -1,15 +1,17 @@
+# variables needed to be provided in extra_vars:
+# target
 ---
 - name: SierraPostInstall
-  hosts: sie-test1
+  hosts: '{{ target }}'
   gather_facts: no 
   tasks:
-    - name: Crate aes encryption key
-      shell: source /APPL/{{ dbo_username }}/users/{{ dbo_username }}/.fnxrc && /APPL/{{ dbo_username }}/bin/aspencrypt -m1 -key_file  /APPL/{{ dbo_username }}/server/.aes128.key -key_bytes 16 
+  #  - name: Crate aes encryption key
+  #    shell: source /APPL/{{ dbo_username }}/users/{{ dbo_username }}/.fnxrc && /APPL/{{ dbo_username }}/bin/aspencrypt -m1 -key_file  /APPL/{{ dbo_username }}/server/.aes128.key -key_bytes 16 
   #    shell: env 
-      args:
-        executable: "/bin/tcsh"
-        chdir: /APPL/{{ dbo_username }}/server
-        creates: /APPL/{{ dbo_username }}/server/.aes128.key
+  #    args:
+  #      executable: "/bin/tcsh"
+  #      chdir: /APPL/{{ dbo_username }}/server
+  #      creates: /APPL/{{ dbo_username }}/server/.aes128.key
     - shell: source /APPL/{{ dbo_username }}/users/{{ dbo_username }}/.fnxrc && /APPL/{{ dbo_username }}/bin/reglogin -c -U {{ dbo_username }} -P fnxltd11 -D {{ db_name }} -S {{ db_service_name }}
       args:
         executable: "/bin/tcsh"

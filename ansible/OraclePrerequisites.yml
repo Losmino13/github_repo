@@ -1,6 +1,8 @@
+# variables needed to be provided in extra_vars:
+# target
 ---
 - name: SetupSierraMinimal
-  hosts: sie-test1
+  hosts: '{{ target }}'
   gather_facts: no 
   tasks:
 #Install Oracle dependent packages

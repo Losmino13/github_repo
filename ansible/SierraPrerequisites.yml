@@ -4,6 +4,7 @@
 # ---Before running fnxinst make sure database user is created and login confirmed
 
 # variables needed to be provided in extra_vars:
+# target
 # dbo_username
 # database (ORACLE,SYBASE)
 # db_name
@@ -15,7 +16,7 @@
 ---
 
 - name: SierraPrerequisites
-  hosts: sie-test1
+  hosts: '{{ target }}'
   gather_facts: no 
   tasks:
     - name: HOST NAME
@@ -42,10 +43,6 @@
       file:
         path: /APPL/{{ dbo_username }}/users/{{ dbo_username }}
         state: directory
-        owner: "{{ dbo_username }}"
-        group: "{{ dbo_username }}"
-        mode: 0750
-        recurse: yes
 #add user and group
     - name: Add user
       user:
@@ -71,7 +68,7 @@
         group: "{{ dbo_username }}"
         mode: 0777
     - name: Copy I file to server
-      synchronize:
+      copy:
         src: /syb/sol/makeinstall/MR7.9.00.SL.i.lin.tar.gz
         dest: /local_backups
     - command: chown "{{ dbo_username }}":"{{ dbo_username }}" /local_backups/MR7.9.00.SL.i.lin.tar.gz
