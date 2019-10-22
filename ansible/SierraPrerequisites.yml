@@ -82,10 +82,6 @@
             remote_src: yes
             src: /local_backups/MR7.9.00.SL.i.lin.tar.gz
             dest: /APPL/{{ dbo_username }}
-          #this task will be depricated after 1320 cut
-        - name: Pauza
-          pause:
-            prompt: "Copy valid fnxrc.EXAMPLE from /home/mmilisav/Issues/fnxrc.EXAMPLE/fnxrc.EXAMPLE to $FNXROOT/install"
         - name: Copy config files
           copy:
             remote_src: yes
@@ -135,7 +131,7 @@
             block: |
               set linesize 500
               set pagesize 300
-              SET SQLPROMPT "{{ dbo_username }}'@'ORADEMO >"
+              SET SQLPROMPT "{{ dbo_username }}'@'{{db_service_name}} >"
             marker: ""
         - name: Editing FNXNet.cnf file
           replace:
