@@ -1,5 +1,8 @@
 # variables needed to be provided in extra_vars:
 # target
+# dbo_username
+# db_name
+# db_service_name
 ---
 - name: SierraPostInstall
   hosts: '{{ target }}'
@@ -18,16 +21,17 @@
       with_items:
         - { src: '/APPL/{{ dbo_username }}/server/reglogin.info', dest: '/APPL/{{ dbo_username }}/server/reglogin.info.{{ dbo_username }}' }
         - { src: '/APPL/{{ dbo_username }}/server/reglogin.info', dest: '/APPL/{{ dbo_username }}/server/reglogin.fx.info' }
-    - name: run CreateDboSsoAndFixUsers.sh
+    - name: Create parameter file for CreateDboAndFixUsers.sh
       shell: |
          source /APPL/{{ dbo_username }}/users/{{ dbo_username }}/.fnxrc
          echo h0bb1t > ~/parameter.txt
          echo 0 >> ~/parameter.txt
          echo y >> ~/parameter.txt
-         cat ~/parameter.txt | Create
       args:
         executable: "/bin/tcsh"
         creates: ~/parameter.txt
+    - name: Run CreateDboAndFixUsers.sh
+      shell: source /APPL/{{ dbo_username }}/users/{{ dbo_username }}/.fnxrc && cat ~/parameter.txt | /APPL/{{ dbo_username }}/script/CreateDboSsoAndFixUsers.sh -T O  -U {{ dbo_username }} -P fnxltd11 -u {{ dbo_username }}SSO -p fnxltd11
       # Permissions setup for Sierra dirs
     - name: Permissions setup for Sierra dirs
       command:   chmod -R o-rwx /APPL/{{ dbo_username }}
