@@ -5,13 +5,6 @@
   hosts: '{{ target }}'
   gather_facts: no 
   tasks:
-  #  - name: Crate aes encryption key
-  #    shell: source /APPL/{{ dbo_username }}/users/{{ dbo_username }}/.fnxrc && /APPL/{{ dbo_username }}/bin/aspencrypt -m1 -key_file  /APPL/{{ dbo_username }}/server/.aes128.key -key_bytes 16 
-  #    shell: env 
-  #    args:
-  #      executable: "/bin/tcsh"
-  #      chdir: /APPL/{{ dbo_username }}/server
-  #      creates: /APPL/{{ dbo_username }}/server/.aes128.key
     - shell: source /APPL/{{ dbo_username }}/users/{{ dbo_username }}/.fnxrc && /APPL/{{ dbo_username }}/bin/reglogin -c -U {{ dbo_username }} -P fnxltd11 -D {{ db_name }} -S {{ db_service_name }}
       args:
         executable: "/bin/tcsh"
@@ -25,14 +18,16 @@
       with_items:
         - { src: '/APPL/{{ dbo_username }}/server/reglogin.info', dest: '/APPL/{{ dbo_username }}/server/reglogin.info.{{ dbo_username }}' }
         - { src: '/APPL/{{ dbo_username }}/server/reglogin.info', dest: '/APPL/{{ dbo_username }}/server/reglogin.fx.info' }
-    - name: Update dbo password
+    - name: run CreateDboSsoAndFixUsers.sh
       shell: |
          source /APPL/{{ dbo_username }}/users/{{ dbo_username }}/.fnxrc
-         echo alter table fnxuser disable all triggers\; | sqlplus {{ dbo_username }}/fnxltd11@{{ db_service_name }}
-         echo update fnxuser set cur_passwd = \'`/APPL/{{ dbo_username }}/bin/aspencrypt fnxltd11`\' where user_ID = \'{{ dbo_username }}\'\; | sqlplus {{ dbo_username }}/fnxltd11@{{ db_service_name }}
-         echo alter table fnxuser enable all triggers\; | sqlplus {{ dbo_username }}/fnxltd11@{{ db_service_name }}
+         echo h0bb1t > ~/parameter.txt
+         echo 0 >> ~/parameter.txt
+         echo y >> ~/parameter.txt
+         cat ~/parameter.txt | Create
       args:
         executable: "/bin/tcsh"
+        creates: ~/parameter.txt
       # Permissions setup for Sierra dirs
     - name: Permissions setup for Sierra dirs
       command:   chmod -R o-rwx /APPL/{{ dbo_username }}
@@ -54,5 +49,4 @@
         dest: /APPL/{{ dbo_username }}/sierra.license
   become: true
   become_user: "{{ dbo_username }}"
-
-  MENJATI OVU SKRIPTU I KORISTITI aspencrypt
+...
