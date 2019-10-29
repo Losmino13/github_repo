@@ -56,4 +56,20 @@
           gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
         backup: yes
         marker: ""
+#Fix network interface domain name(s)
+    - name: toReplace
+      command: cat /etc/sysconfig/network-scripts/ifcfg-ens192 | grep DOMAIN | awk -F"=" '{print $2}'
+      register: toReplace
+    - name: replaceWith
+      command: cat /etc/sysconfig/network-scripts/ifcfg-ens192 | grep DOMAIN | awk -F"=" '{print $2}'  | sed 's/^/"/;s/$/"/'
+      register: replaceWith
+    - name: Editing /etc/sysconfig/network-scripts/ifcfg-ens192
+      replace:
+        path: /etc/sysconfig/network-scripts/ifcfg-ens192
+        regexp: "{{ toReplace.stdout }}"
+        replace: "{{ replaceWith.stdout }}"
+    - name: service network restart
+      service:
+        name: network
+        state: restarted
 ...
