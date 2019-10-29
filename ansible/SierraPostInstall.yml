@@ -31,7 +31,21 @@
         executable: "/bin/tcsh"
         creates: ~/parameter.txt
     - name: Run CreateDboAndFixUsers.sh
-      shell: source /APPL/{{ dbo_username }}/users/{{ dbo_username }}/.fnxrc && cat ~/parameter.txt | /APPL/{{ dbo_username }}/script/CreateDboSsoAndFixUsers.sh -T O  -U {{ dbo_username }} -P fnxltd11 -u {{ dbo_username }}SSO -p fnxltd11
+      shell: source /APPL/{{ dbo_username }}/users/{{ dbo_username }}/.fnxrc && cat ~/parameter.txt | /APPL/{{ dbo_username }}/script/CreateDboSsoAndFixUsers.sh -T O -S {{ db_service_name }} -U {{ dbo_username }} -P fnxltd11 -u {{ dbo_username }}SSO -p fnxltd11
+      args:
+        executable: "/bin/tcsh"
+    - name: Update sydefault and sbdefault tables for visibility
+      shell: |
+        source /APPL/{{ dbo_username }}/users/{{ dbo_username }}/.fnxrc
+        echo alter table fnxuser disable all triggers\; | sqlplus {{ dbo_username }}/fnxltd11@{{ db_service_name }}
+        echo alter table sydefault disable all triggers\; | sqlplus {{ dbo_username }}/fnxltd11@{{ db_service_name }}
+        echo update sydefault set visibility='NORMAL' where visibility is NULL\; | sqlplus {{ dbo_username }}/fnxltd11@{{ db_service_name }}
+        echo alter table sydefault enable all triggers\; | sqlplus {{ dbo_username }}/fnxltd11@{{ db_service_name }}
+        echo alter table sbdefault disable all triggers\; | sqlplus {{ dbo_username }}/fnxltd11@{{ db_service_name }}
+        echo update sbdefault set visibility='NORMAL' where visibility is NULL\; | sqlplus {{ dbo_username }}/fnxltd11@{{ db_service_name }}
+        echo alter table sbdefault enable all triggers\; | sqlplus {{ dbo_username }}/fnxltd11@{{ db_service_name }}
+      args:
+        executable: "/bin/tcsh"
       # Permissions setup for Sierra dirs
     - name: Permissions setup for Sierra dirs
       command:   chmod -R o-rwx /APPL/{{ dbo_username }}
