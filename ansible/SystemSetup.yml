@@ -58,10 +58,10 @@
         marker: ""
 #Fix network interface domain name(s)
     - name: toReplace
-      command: cat /etc/sysconfig/network-scripts/ifcfg-ens192 | grep DOMAIN | awk -F"=" '{print $2}'
+      shell: cat /etc/sysconfig/network-scripts/ifcfg-ens192 | grep DOMAIN | awk -F"=" '{print $2}'
       register: toReplace
     - name: replaceWith
-      command: cat /etc/sysconfig/network-scripts/ifcfg-ens192 | grep DOMAIN | awk -F"=" '{print $2}'  | sed 's/^/"/;s/$/"/'
+      shell: cat /etc/sysconfig/network-scripts/ifcfg-ens192 | grep DOMAIN | awk -F"=" '{print $2}'  | sed 's/^/"/;s/$/"/'
       register: replaceWith
     - name: Editing /etc/sysconfig/network-scripts/ifcfg-ens192
       replace:

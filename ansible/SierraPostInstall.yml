@@ -65,6 +65,11 @@
         remote_src: no
         src: /etc/ansible/playbooks/files/sierra.license.development
         dest: /APPL/{{ dbo_username }}/sierra.license
+    - name: Copy check_patch_log script
+      copy:
+        remote_src: no
+        src: /etc/ansible/playbooks/files/check_patch_log_file
+        dest: /APPL/{{ dbo_username }}/users/{{ dbo_username }}/check_patch_log_file
   become: true
   become_user: "{{ dbo_username }}"
 ...

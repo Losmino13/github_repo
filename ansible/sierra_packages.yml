@@ -16,6 +16,8 @@ packages:
   - libxml2.i686
   - ksh
   - libuuid.i686
+  - apr.i686
+  - apr-util.i686
   - bash
   - bzip2
   - curl
