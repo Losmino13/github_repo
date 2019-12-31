@@ -1,0 +1,73 @@
+---
+
+- name: BigFix installation
+  hosts: oraqa19
+
+  tasks:
+    - name: HOST
+      command: uname -a
+      register: stdout
+    - debug: var=stdout.stdout_lines
+
+    - name: Making dir
+      file:
+        path: /etc/opt/BESClient
+        state: directory
+        owner: root
+        group: root
+        mode: 0755
+
+    - name: Copy actionsite
+      copy:
+        src: /home/mmilisav/BigFix/tmpl/actionsite.afxm
+        dest: /etc/opt/BESClient/actionsite.afxm
+        owner: root
+        group: root
+        mode: 0755
+
+    - name: Rpm package install
+      command: rpm -ivh /home/mmilisav/BigFix/tmpl/BESAgent-9.5.7.90-rhe6.x86_64.rpm
+      register: stdout
+    - debug: var=stdout.stdout_lines
+
+    - name: Start service
+      service:
+        name: besclient
+        state: started
+
+    - name: Pauza
+      pause:
+        prompt: "Check if besclient service is started"
+
+    - name: Stop service
+      service:
+        name: besclient
+        state: stopped
+
+    - name: Adding required configuration
+      blockinfile:
+        path: /var/opt/BESClient/besclient.config
+        insertafter: EOF
+        block: |
+           [Software\BigFix\EnterpriseClient\Settings\Client\Support Group]
+           value                          = Sierra%20Server%20Support
+
+           [Software\BigFix\EnterpriseClient\Settings\Client\Role]
+           value                          = Development
+           effective date                 = Thu,%2014%20Dec%202017%2000:30:29%20-0500
+
+           [Software\BigFix\EnterpriseClient\Settings\Client\Exposure]
+           value                          = Internal
+           effective date                 = Thu,%2014%20Dec%202017%2000:30:29%20-0500
+
+           [Software\BigFix\EnterpriseClient\Settings\Client\Product ID]
+           value                          = 12321
+           effective date                 = Thu,%2014%20Dec%202017%2000:30:29%20-0500
+
+        backup: yes
+        marker: ""
+
+    - name: Start service
+      service:
+        name: besclient
+        state: started
