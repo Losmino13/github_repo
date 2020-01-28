@@ -12,7 +12,7 @@ FREE_SPACE=`df -kh | grep -w /home | awk '{print $3}' | sed -e 's/G//'`
 THRESHOLD=200
 if [ $FREE_SPACE -lt $THRESHOLD ] 
 then
-    echo "Threshold violated please check NFS disk!" | mailx -s "exporthome FULL" -r milos.milisavljevic@fisglobal.com milos.milisavljevic@fisglobal.com
+    echo "Threshold violated please check NFS disk!" | mailx -s "exporthome FULL" -r email email
 
 fi
 #prati user homove i obavesti ako je neko prebacio 5GB
@@ -41,7 +41,7 @@ echo "Script $DIRNAME/$BASENAME" >> $EMAIL
 SEND_EMAIL_YES=`cat $EMAIL | grep "\-\-\-"`
 if [ ! -z "$SEND_EMAIL_YES" ]
 then
-cat $EMAIL | mailx -s "Belgrade home direcroriums need cleanup" -r milos.milisavljevic@fisglobal.com milos.milisavljevic@fisglobal.com
+cat $EMAIL | mailx -s "Belgrade home direcroriums need cleanup" -r email email
 fi
 rm -f $DIRNAME/logs/users_to_watch.tmp
 rm -f $EMAIL
