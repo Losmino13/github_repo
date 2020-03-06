@@ -1,2 +1,5 @@
 3tier_github
 Codebeauty.pl
+toptal/infra/.terraform/*
+toptal/infra/terraform.tfstate
+toptal/infra/terraform.tfstate.backup
