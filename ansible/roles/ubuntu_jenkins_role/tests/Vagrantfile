@@ -1,0 +1,14 @@
+Vagrant.configure("2") do |config|
+  config.vm.box = "ubuntu/bionic64"
+
+  config.vm.provision "ansible" do |ansible|
+    ansible.playbook = "test.yml"
+    ansible.host_vars = {
+      "jenkins_server_url" => ENV["jenkins_server_url"],
+      "jenkins_build_agent_secret" => ENV["jenkins_build_agent_secret"],
+      "jenkins_build_agent_user" => "jnksbuild",
+      "jenkins_build_agent_group" => "jnksbuild",
+      "jenkins_build_agent_name" => "toolers-test"
+    }
+  end
+end

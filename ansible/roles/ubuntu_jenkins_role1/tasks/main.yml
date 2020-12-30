@@ -1,0 +1,30 @@
+---
+- name: Setup DNS
+  import_tasks: setup_dns.yml
+
+- name: Update OS packages
+  import_tasks: update_os_packages.yml
+
+- name: Install required OS packages
+  import_tasks: install_os_packages.yml
+
+- name: Setup DNS permanently with resolvconf utility
+  import_tasks: setup_dns_permanently.yml
+
+- name: Setup Git
+  import_tasks: setup_git.yml
+
+- name: Setup GRUB (turn off IPv6)
+  import_tasks: setup_grub.yml
+
+- name: Setup NTP
+  import_tasks: setup_ntp.yml
+
+- name: Setup SSH
+  import_tasks: setup_ssh.yml
+
+- name: Setup Jenkins build agent
+  import_tasks: setup_jenkins_build_agent.yml
+
+- name: Setup Python
+  import_tasks: setup_python.yml

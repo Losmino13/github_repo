@@ -1,0 +1,51 @@
+---
+ansible_python_interpreter: /usr/bin/python3
+
+apt_packages:
+- openssh-server
+- ntp
+- firefox
+- open-vm-tools-desktop
+- openjdk-8-jdk
+- git
+- git-lfs
+- curl
+- python3
+- python3-pip
+- virtualenv
+- traceroute
+- xclip
+- resolvconf
+- python2.7
+- python-pip
+
+pip_packages:
+- dataclasses
+- marshmallow_dataclass
+- pyyaml
+- requests
+- splunk-sdk
+- enum34
+- jinja2
+- jsonmerge
+
+pip2_packages:
+- dataclasses
+- marshmallow
+- pyyaml
+- requests
+- splunk-sdk
+- enum34
+- jinja2
+
+git_lfs_setup_script_url: https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh
+
+jenkins_server_url: https://sqbu-jenkins.wbx2.com/client
+
+jenkins_build_agent_user: admin
+jenkins_build_agent_group: admin
+jenkins_build_agent_name: "{{ node_name }}"
+jenkins_build_agent_home: /media/admin/local/ws
+jenkins_build_agent_java: /usr/bin/java
+jenkins_build_agent_run: /var/run/jenkins
+jenkins_build_agent_secret: "{{ secret }}"

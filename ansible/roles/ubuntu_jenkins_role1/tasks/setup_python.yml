@@ -1,0 +1,40 @@
+---
+- name: Set Python2.7 to be the default Python version
+  become: yes
+  alternatives:
+    name: python
+    link: /usr/bin/python
+    path: /usr/bin/python2.7
+    priority: 1
+  tags: python
+
+- name: Upgrade pip
+  pip:
+    name: pip
+    state: latest
+  tags: python
+
+- name: Install Python modules
+  become_user: '{{ jenkins_build_agent_user }}'
+  pip:
+    name: '{{ item }}'
+    extra_args: --user
+  loop: '{{ pip_packages }}'
+  tags: python
+
+
+- name: Set python2 to point on python2.7
+  become: yes
+  alternatives:
+    name: python2
+    link: /usr/bin/python2
+    path: /usr/bin/python2.7
+    priority: 1
+  tags: python
+
+- name: Install Python 2 modules
+  become_user: '{{ jenkins_build_agent_user }}'
+  shell: |
+    python2 -m pip install '{{ item }}'
+  loop: '{{ pip2_packages }}'
+  tags: python

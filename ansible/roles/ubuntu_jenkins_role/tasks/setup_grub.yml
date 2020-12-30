@@ -1,0 +1,11 @@
+---
+- name: Update GRUB config
+  become: yes
+  copy:
+    src: grub.conf
+    dest: /etc/default/grub
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - update_grub_config

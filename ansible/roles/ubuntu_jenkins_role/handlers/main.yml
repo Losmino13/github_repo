@@ -1,0 +1,19 @@
+---
+- name: restart_sshd_service
+  become: yes
+  service:
+    name: sshd
+    state: restarted
+
+- name: update_grub_config
+  become: yes
+  shell: update-grub
+
+- name: Start Jenkins JNLP agent
+  become: yes
+  systemd:
+    name: jenkins-build-agent
+    enabled: yes
+    state: restarted
+    daemon_reload: yes
+  tags: jenkins-build-agent

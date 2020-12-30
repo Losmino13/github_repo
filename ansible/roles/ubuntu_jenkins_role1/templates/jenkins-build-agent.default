@@ -1,0 +1,12 @@
+JENKINS_RUN="{{ jenkins_build_agent_run }}"
+
+# URL of jenkins server to connect to
+# Not specifying this parameter will stop the slave
+# job from running.
+JENKINS_URL="{{ jenkins_server_url }}"
+
+# Node name
+JENKINS_NODE_NAME="{{ jenkins_build_agent_name }}"
+
+# Secret key to access Jenkins server
+JENKINS_SECRET="{{ jenkins_build_agent_secret }}"

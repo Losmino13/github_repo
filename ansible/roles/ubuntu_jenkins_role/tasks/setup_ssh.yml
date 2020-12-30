@@ -1,0 +1,17 @@
+---
+- name: Update SSH config
+  become: yes
+  copy:
+    src: sshd_config.conf
+    dest: /etc/ssh/sshd_config
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - restart_sshd_service
+
+- name: Auto-launch OpenSSH service on system launch
+  become: yes
+  systemd:
+    name: sshd
+    enabled: yes

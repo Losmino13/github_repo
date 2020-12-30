@@ -1,0 +1,69 @@
+---
+- name: Create group
+  become: yes
+  group:
+    name: '{{ jenkins_build_agent_user }}'
+    state: present
+
+- name: Create user which will run Jenkins builds
+  become: yes
+  user:
+    name: '{{ jenkins_build_agent_user }}'
+    comment: Jenkins build agent
+    group: '{{ jenkins_build_agent_group }}'
+    shell: /bin/bash
+
+- name: Create SSH directory for Jenkins agent user
+  become: yes
+  file:
+    path: /home/'{{ jenkins_build_agent_user }}'/.ssh
+    state: directory
+    owner: '{{ jenkins_build_agent_user }}'
+    group: '{{ jenkins_build_agent_group }}'
+    mode: '0755'
+
+- name: Add authorized keys to the new user
+  become: yes
+  authorized_key:
+    user: '{{ jenkins_build_agent_user }}'
+    state: present
+    key: '{{ item }}'
+  with_file:
+    - public_keys/stevan-cvetkovic
+
+- name: Initialize Git LFS for the current user
+  become: yes
+  become_user: '{{ jenkins_build_agent_user }}'
+  shell: git lfs install
+  args:
+    creates: /home/'{{ jenkins_build_agent_user }}'/.gitconfig
+
+- name: Check if Jenkins JNLP agent variables are defined
+  assert:
+    that:
+      - "jenkins_server_url is defined"
+      - "jenkins_build_agent_secret is defined"
+  tags: jenkins-build-agent
+
+- name: Make Jenkins JNLP agent directories
+  become: yes
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ jenkins_build_agent_user }}"
+    group: "{{ jenkins_build_agent_group }}"
+  with_items:
+    - "{{ jenkins_build_agent_home }}"
+    - "{{ jenkins_build_agent_root }}/bin"
+  tags: jenkins-build-agent
+
+- name: Template Jenkins JNLP slave files
+  become: yes
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  with_items:
+    - { src: jenkins-build-agent.service, dest: /etc/systemd/system/jenkins-build-agent.service, mode: 755 }
+    - { src: jenkins-build-agent.default, dest: /etc/default/jenkins-build-agent, mode: 644 }
+  notify: Start Jenkins JNLP agent
+  tags: jenkins-build-agent

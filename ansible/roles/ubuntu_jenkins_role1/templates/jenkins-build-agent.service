@@ -1,0 +1,17 @@
+[Unit]
+Description=Jenkins JNLP agent
+Wants=network.target
+After=network.target
+
+[Service]
+EnvironmentFile=/etc/default/jenkins-build-agent
+ExecStartPre=/bin/mkdir -p ${JENKINS_RUN}
+ExecStartPre=/bin/chown -R {{ jenkins_build_agent_user }}:{{ jenkins_build_agent_group }} ${JENKINS_RUN}
+ExecStartPre=/usr/bin/wget -q -O ${JENKINS_RUN}/slave.jar ${JENKINS_URL}/jnlpJars/slave.jar
+ExecStart={{ jenkins_build_agent_java }} -jar ${JENKINS_RUN}/slave.jar -jnlpUrl ${JENKINS_URL}/computer/${JENKINS_NODE_NAME}/slave-agent.jnlp -secret=${JENKINS_SECRET}
+User={{ jenkins_build_agent_user }}
+PermissionsStartOnly=true
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

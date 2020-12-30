@@ -1,0 +1,16 @@
+---
+- name: Add Git repository
+  become: yes
+  apt_repository:
+    repo: ppa:git-core/ppa
+    state: present
+
+- name: Download Git LFS setup script
+  get_url:
+    url: '{{ git_lfs_setup_script_url }}'
+    dest: /tmp/git_lfs.deb.sh
+    mode: "0755"
+
+- name: Setup Git LFS
+  become: yes
+  shell: bash /tmp/git_lfs.deb.sh

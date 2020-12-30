@@ -1,0 +1,21 @@
+---
+- name: Update and upgrade all installed packages
+  become: yes
+  apt:
+    upgrade: yes
+    update_cache: yes
+
+- name: Reboot machine if kernel/libs updated and requested by the system
+  become: yes
+  shell: sleep 5 && /sbin/shutdown -r now 'Rebooting box to update system libs/kernel as needed'
+  args:
+    removes: /var/run/reboot-required
+  async: 300
+  poll: 0
+  ignore_errors: true
+
+- name: Wait for system to become reachable again
+  wait_for_connection:
+    delay: 60
+    sleep: 5
+    timeout: 300

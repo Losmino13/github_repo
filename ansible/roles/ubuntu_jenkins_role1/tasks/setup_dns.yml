@@ -1,0 +1,9 @@
+---
+- name: initial setup of dns(resolv.conf)
+  become: yes
+  copy:
+    src: resolv.conf
+    dest: /etc/resolv.conf
+    owner: root
+    group: root
+    mode: "0644"

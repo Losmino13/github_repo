@@ -1,0 +1,20 @@
+---
+- name: Set Python3 to be the default Python version
+  become: yes
+  alternatives:
+    name: python
+    link: /usr/bin/python
+    path: /usr/bin/python3
+    priority: 1
+
+- name: Upgrade pip
+  pip:
+    name: pip
+    state: latest
+
+- name: Install Python modules
+  become_user: '{{ jenkins_build_agent_user }}'
+  pip:
+    name: '{{ item }}'
+    extra_args: --user
+  loop: '{{ pip_packages }}'

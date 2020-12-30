@@ -1,0 +1,10 @@
+---
+- name: Install required system packages
+  become: yes
+  apt:
+    state: present
+    update_cache: yes
+    name: '{{ item }}'
+  loop: '{{ apt_packages }}'
+  register: apt_output
+  tags: os_packages

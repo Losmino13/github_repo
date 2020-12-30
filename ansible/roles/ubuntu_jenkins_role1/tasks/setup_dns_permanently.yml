@@ -1,0 +1,11 @@
+---
+- name: permanently setup of dns(resolvconf utility)
+  become: yes
+  copy:
+    src: resolvconf.head.conf
+    dest: /etc/resolvconf/resolv.conf.d/head
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - restart_resolvconf_service

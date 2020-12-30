@@ -1,0 +1,8 @@
+---
+- name: Make sure NTP daemon is up and enabled
+  become: yes
+  service:
+    name: ntp
+    state: started
+    enabled: yes
+  tags: ntp
