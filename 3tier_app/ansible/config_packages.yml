@@ -1,0 +1,5 @@
+---
+#list of packages required for Sierra
+packages:
+  - httpd.x86_64
+  - mysql

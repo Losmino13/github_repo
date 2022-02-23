@@ -1,0 +1,19 @@
+---
+- name: Configure Instance
+  hosts: all
+  gather_facts: no 
+  tasks:
+    - name: HOST NAME
+      command: uname -a
+      register: stdout
+    - debug: var=stdout.stdout_lines
+#INSTALL ALL PACKAGES
+    - name: including list of packages
+      include_vars:
+        file: packages.yml
+        name: config_packages
+    - name: Install required packages
+      yum:
+        name: "{{ item }}"
+        state: latest
+      loop: "{{ config_packages.packages }}"

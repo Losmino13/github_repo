@@ -1,10 +1,10 @@
 terraform {
   backend "s3" {
-    bucket = "3tier-app-backend"
-    key    = "terraform/states/dev/3tier.tfstate"
-    region = "eu-west-1"
+    bucket         = "3tier-app-backend"
+    key            = "terraform/states/dev/3tier.tfstate"
+    region         = "eu-west-1"
     dynamodb_table = "3tier-lock"
-    encrypt = true
+    encrypt        = true
   }
 }
 
