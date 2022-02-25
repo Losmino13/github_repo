@@ -1,0 +1,16 @@
+---
+- name: playbook
+  hosts: all
+
+  tasks:
+    - name: Copy sql file to remote server
+      ansible.builtin.copy:
+        remote_src: no
+        src: create_table.sql
+        dest: /home/ec2-user
+    - name: Run table sql file
+      shell:  mysql -u threetieruser -h terraform-20220224103529922700000001.cka3kxkzuvda.eu-west-1.rds.amazonaws.com threetierdb < create_table.sql
+      args:
+        executable: "/bin/bash"
+        chdir: /home/ec2-user
+      

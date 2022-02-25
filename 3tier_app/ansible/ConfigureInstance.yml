@@ -10,7 +10,7 @@
 #INSTALL ALL PACKAGES
     - name: including list of packages
       include_vars:
-        file: packages.yml
+        file: ./config_packages.yml
         name: config_packages
     - name: Install required packages
       yum:
