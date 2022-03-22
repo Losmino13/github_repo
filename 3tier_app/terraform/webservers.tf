@@ -4,7 +4,7 @@ resource "aws_key_pair" "webserver_kep_pair" {
 }
 
 resource "aws_instance" "web1" {
-  ami                    = "ami-0bf84c42e04519c85"
+  ami                    = "ami-08ca3fed11864d6bb"
   instance_type          = "t2.micro"
   availability_zone      = "eu-west-1a"
   user_data              = file("../shell/install_apache.sh")
