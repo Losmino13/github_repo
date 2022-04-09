@@ -2,7 +2,7 @@ Hi Milos,
 
 The requirements for the test project are:
 
-You want to design a continuous delivery architecture for a scalable and secure 3 tier Node application. Application to use can be found on https://git.toptal.com/namikp/node-3tier-app.
+You want to design a continuous delivery architecture for a scalable and secure 3 tier Node application. Application to use can be found on
 
 Both web and API tiers should be exposed to the internet and DB tier should not be accessible from the internet. 
 
@@ -26,8 +26,6 @@ As a solution, please commit to the git repo the following:
 - All the relevant runtime handling scripts (start/stop/scale nodes).
 - All the relevant backup scripts.
 Please use this private repository to version-control your code:
-Git repo: https://git.toptal.com/screening/milos-milisavljevic
-Username: milisavljevic.milos@yahoo.com
 
 Helpful take-home project guidelines:
 
