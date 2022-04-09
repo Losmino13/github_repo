@@ -1,0 +1,62 @@
+####
+Loging to file django DONE
+Two instances with alb postponed for Friday
+Provision elk stack docker
+dockerize app
+
+####
+
+
+
+The requirements for the test project are:
+Please perform the following actions:
+
+You want to design a scalable and secure continuous delivery architecture for a full-stack web application. 
+Since the app itself is not going to be scored, you can use any of the implemented technology available for
+Real World applications available at https://github.com/gothinkster/realworld. 
+Please pick the technology you would want to work with on Toptal clients. 
+You should fork the repository and use it as the base for your system.
+
+The architecture needs to be broken down into the relevant tiers (application, database, etc.).
+
+The architecture should be completely provisioned via Chef/Puppet/Ansible/similar.
+
+The deployment of new code and execution of tests should be completely automated. (Bonus points if you can catch performance regressions).
+
+The database and any mutable storage need to be backed up at least daily.
+
+All relevant logs for all tiers need to be easily accessible (having them on the hosts is not an option).
+
+Implement monitoring and logging using self-provisioned tools. Usage of managed services for monitoring/logging is not permitted.
+You should fork the repository and use it as the base for your system.
+
+You should be able to deploy it on one larger Cloud provider: AWS / Google Cloud / Azure / DigitalOcean / RackSpace.
+
+The system should present relevant historical metrics to spot and debug bottlenecks.
+As a solution, please commit to the git repo the following:
+
+An architectural diagram / PPT to explain your architecture during the interview.
+
+All the relevant configuration scripts (Chef/Puppet/cfengine/ansible/cloud formation)
+
+All the relevant runtime handling scripts (start/stop/scale nodes).
+
+All the relevant backup scripts.
+
+The forked version of the app you are going to use.
+
+Please use this private repository to version-control your code:
+https://git.toptal.com/screening/milos-milisavljevic-2
+Username: milisavljevic.milos@yahoo.com
+
+Helpful take-home project guidelines:
+
+• This project will be used to evaluate your skills and should be fully functional without any obvious missing pieces. We will evaluate the project as if you were delivering it to a customer.
+• The deadline to submit your completed project is 2 weeks from the date you received the project requirements.
+• If you schedule your final interview after the 2-week deadline, make sure to submit your completed project and all code to the private repository before the deadline. Everything that is submitted after the deadline will not be taken into consideration.
+• Please do not commit any code at least 12 hours before the meeting time so that it can be reviewed. Anything that is submitted after this time will not be taken into consideration.
+• Please join the meeting room for this final interview on time. If you miss your interview without providing any prior notice, your application may be paused for six months.
+
+Please schedule an interview time that is most suitable for you. Bear in mind that you will need to show a finished project during this interview.
+
+Once you pick an appointment time, we’ll email you with additional meeting details and contact information of another senior developer from our team who will conduct your next interview. You may reach out to them if you have any questions.

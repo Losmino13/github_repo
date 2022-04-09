@@ -36,6 +36,21 @@ resource "aws_security_group" "webserver_sg" {
     protocol        = "tcp"
     security_groups = [aws_security_group.web_sg.id]
   }
+  ingress {
+    description     = "HTTP from LoadBalancer"
+    from_port       = 8000
+    to_port         = 8000
+    protocol        = "tcp"
+    security_groups = [aws_security_group.web_sg.id]
+  }
+
+  ingress {
+    description     = "HTTP from anywhere 8000"
+    from_port       = 8000
+    to_port         = 8000
+    protocol        = "tcp"
+    cidr_blocks     = ["0.0.0.0/0"]
+  }
 
   ingress {
     description = "SSH from my IP"

@@ -7,7 +7,7 @@ resource "aws_instance" "web1" {
   ami                    = "ami-08ca3fed11864d6bb"
   instance_type          = "t2.micro"
   availability_zone      = "eu-west-1a"
-  user_data              = file("../shell/install_apache.sh")
+  user_data              = file("../shell/install_app.sh")
   subnet_id              = aws_subnet.web_subnet_1.id
   vpc_security_group_ids = [aws_security_group.webserver_sg.id]
   key_name               = "ws-ssh-key"
@@ -18,16 +18,16 @@ resource "aws_instance" "web1" {
   }
 }
 
-# resource "aws_instance" "web2" {
-#   ami                    = "ami-0bf84c42e04519c85"
-#   instance_type          = "t2.micro"
-#   availability_zone      = "eu-west-1b"
-#   user_data              = file("../shell/install_apache.sh")
-#   subnet_id              = aws_subnet.web_subnet_2.id
-#   vpc_security_group_ids = [aws_security_group.webserver_sg.id]
-#   key_name               = "ws-ssh-key"
+resource "aws_instance" "web2" {
+  ami                    = "ami-08ca3fed11864d6bb"
+  instance_type          = "t2.micro"
+  availability_zone      = "eu-west-1b"
+  user_data              = file("../shell/install_app.sh")
+  subnet_id              = aws_subnet.web_subnet_2.id
+  vpc_security_group_ids = [aws_security_group.webserver_sg.id]
+  key_name               = "ws-ssh-key"
 
-#   tags = {
-#     Name = "Web Server 2"
-#   }
-# }
+  tags = {
+    Name = "Web Server 2"
+  }
+}

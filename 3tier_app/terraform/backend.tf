@@ -17,6 +17,10 @@ resource "aws_s3_bucket" "tf_remote_state_dev" {
   lifecycle {
     prevent_destroy = true
   }
+  logging {
+    target_bucket = "3tier-logs"
+    target_prefix = "S3Logs"
+  }
 
   tags = {
     Name = "S3 Remote Terraform State Store"
