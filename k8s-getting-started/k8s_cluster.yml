@@ -1,0 +1,13 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: losmino-cluster
+nodes:
+- role: control-plane
+  extraPortMappings:
+    - containerPort: 31111
+      hostPort: 8000
+  extraMounts:
+    - hostPath: /Users/milosmilisavljevic/dev/github_repo/k8s-getting-started
+      containerPath: /files
+- role: worker
+- role: worker
